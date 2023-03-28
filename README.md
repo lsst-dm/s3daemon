@@ -1,2 +1,4 @@
-# s3daemon
-Client/server for pushing to objects to S3 storage.
+s3daemon
+========
+
+Client/server for pushing objects to S3 storage.
