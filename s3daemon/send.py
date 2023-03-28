@@ -39,7 +39,13 @@ def send(filename, dest):
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
         sock.connect(("localhost", PORT))
         sock.sendall(bytes(f"{filename} {dest}\n", "UTF-8"))
+        received = str(sock.recv(4096), "utf-8")
         sock.close()
+        if received.startswith("Success"):
+            sys.exit(0)
+        else:
+            print(received, file=sys.stderr)
+            sys.exit(1)
 
 
 if __name__ == "__main__":

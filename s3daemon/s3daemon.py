@@ -38,7 +38,7 @@ config = botocore.config.Config(
 PORT = 15555
 endpoint_url = os.environ["S3_ENDPOINT_URL"]
 
-async def handle_client(client, reader):
+async def handle_client(client, reader, writer):
     """Handle a client connection to the server socket.
 
     Parameters
@@ -47,13 +47,19 @@ async def handle_client(client, reader):
         The S3 client to use to talk to the server.
     reader : `asyncio.StreamReader`
         A stream connected to the socket to read the filename/destination pair.
+    writer : `asyncio.StreamWriter`
+        A stream connected to the socket to write back status information.
     """
     filename, dest = (await reader.readline()).decode("UTF-8").rstrip().split(" ")
     start = time.time()
     # ignore the alias
     _, bucket, key = dest.split("/", maxsplit=2)
     with open(filename, "rb") as f:
-        await client.put_object(Body=f, Bucket=bucket, Key=key)
+        try:
+            await client.put_object(Body=f, Bucket=bucket, Key=key)
+            writer.write(b"Success")
+        except Exception as e:
+            writer.write(bytes(repr(e), "UTF-8"))
     print(start, time.time() - start, "sec")
 
 
@@ -62,7 +68,7 @@ async def main():
     session = aiobotocore.session.get_session()
     async with session.create_client("s3", endpoint_url=endpoint_url, config=config) as client:
         async def client_cb(reader, writer):
-            await handle_client(client, reader)
+            await handle_client(client, reader, writer)
 
         server = await asyncio.start_server(client_cb, "localhost", PORT)
         async with server:
