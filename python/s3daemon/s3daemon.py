@@ -37,6 +37,9 @@ config = botocore.config.Config(
 
 PORT = 15555
 endpoint_url = os.environ["S3_ENDPOINT_URL"]
+access_key = os.environ["AWS_ACCESS_KEY_ID"]
+secret_key = os.environ["AWS_SECRET_ACCESS_KEY"]
+
 
 async def handle_client(client, reader, writer):
     """Handle a client connection to the server socket.
@@ -66,7 +69,14 @@ async def handle_client(client, reader, writer):
 async def main():
     """Start the server."""
     session = aiobotocore.session.get_session()
-    async with session.create_client("s3", endpoint_url=endpoint_url, config=config) as client:
+    async with session.create_client(
+        "s3",
+        aws_access_key_id=access_key,
+        aws_secret_access_key=secret_key,
+        endpoint_url=endpoint_url,
+        config=config,
+    ) as client:
+
         async def client_cb(reader, writer):
             await handle_client(client, reader, writer)
 
