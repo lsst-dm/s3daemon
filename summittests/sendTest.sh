@@ -6,12 +6,23 @@
 source  envvars.sh
 source venv/bin/activate
 
-echo "S3_ENDPOINT_URL is $S3_ENDPOINT_URL"
-count=20
+
+
+repeat=2
+if [ $1 ] 
+then
+  repeat="$1"
+fi
+echo "S3_ENDPOINT_URL is $S3_ENDPOINT_URL  repeat $repeat"
 
 files=`ls  ~tonyj/Test/MC*/* | head -${count}`
 
 fcount=0
+l=0
+
+while [[ l -le repeat ]] 
+do
+l=$((l + 1))
 for f in $files; do 
    key=`echo $f | cut -d'/' -f6 | sed 's/.fits//g'`
    echo Sending $f $key
@@ -22,4 +33,5 @@ for f in $files; do
        sleep 20s
        echo "Sleeping"
    fi 
+done
 done

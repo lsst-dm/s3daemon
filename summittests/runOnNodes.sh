@@ -5,7 +5,7 @@
 
 source  envvars.sh
 
-cmd="./$1"
+cmd="$@"
 
 for n in $nodes; do 
    exec="cd s3daemon/summittests; ${cmd}" 

@@ -7,5 +7,5 @@ source  envvars.sh
 
 
 for n in $nodes; do 
-   rsync -a --exclude '/home/womullan/s3daemon/logs' /home/womullan/s3daemon ${n}:
+   rsync -a --exclude '/home/womullan/s3daemon/logs' --exclude '*.log' /home/womullan/s3daemon ${n}:
    done
