@@ -11,7 +11,8 @@ source venv/bin/activate
 
 host=`echo $HOSTNAME | cut -d'.' -f1`
 logfile="${host}-s3daemon.log"
+export S3DAEMON_LOG="$logfile"
 
-echo "S3_ENDPOINT_URL is $S3_ENDPOINT_URL"
+echo "S3_ENDPOINT_URL is $S3_ENDPOINT_URL log $logfile"
 
-python ../python/s3daemon/s3daemon.py > $logfile  2>&1 &
+python ../python/s3daemon/s3daemon.py  &
