@@ -4,14 +4,22 @@
 
 
 source  envvars.sh
+source venv/bin/activate
 
 echo "S3_ENDPOINT_URL is $S3_ENDPOINT_URL"
 count=20
 
-files=`ls ~tonyj/Data/MC_C_20200822_000054/MC_C_20200822* | head -${count}`
-echo $files
+files=`ls  ~tonyj/Test/MC*/* | head -${count}`
+
+fcount=0
 for f in $files; do 
    key=`echo $f | cut -d'/' -f6 | sed 's/.fits//g'`
    echo Sending $f $key
    python ../python/s3daemon/send.py $f “/${bucket}/${prefix}/${key}” & 
-   done
+   fcount=$((fcount + 1))
+   if [ $((fcount % 20)) ==  0 ]
+   then
+       sleep 20s
+       echo "Sleeping"
+   fi 
+done
