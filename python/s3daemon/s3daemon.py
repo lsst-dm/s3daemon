@@ -20,6 +20,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
+import logging
 import os
 import time
 
@@ -39,6 +40,14 @@ PORT = 15555
 endpoint_url = os.environ["S3_ENDPOINT_URL"]
 access_key = os.environ["AWS_ACCESS_KEY_ID"]
 secret_key = os.environ["AWS_SECRET_ACCESS_KEY"]
+
+pylog_longLogFmt = "{levelname} {asctime} {name} - {message}"
+if "S3DAEMON_LOG" in os.environ:
+    logging.basicConfig(filename=os.environ["S3DAEMON_LOG"], format=pylog_longLogFmt, style="{")
+else:
+    logging.basicConfig(format=pylog_longLogFmt, style="{")
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
 
 
 async def handle_client(client, reader, writer):
@@ -63,7 +72,7 @@ async def handle_client(client, reader, writer):
             writer.write(b"Success")
         except Exception as e:
             writer.write(bytes(repr(e), "UTF-8"))
-    print(start, time.time() - start, "sec")
+    log.info("%f %f sec", start, time.time() - start)
 
 
 async def main():
@@ -81,6 +90,7 @@ async def main():
             await handle_client(client, reader, writer)
 
         server = await asyncio.start_server(client_cb, "localhost", PORT)
+        log.info("Starting server")
         async with server:
             await server.serve_forever()
 
