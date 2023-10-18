@@ -4,35 +4,33 @@
 
 
 source  envvars.sh
-source venv/bin/activate
 
-
-
-repeat=2
+totalfiles=20
 if [ $1 ] 
 then
   repeat="$1"
 fi
-echo "Just read   repeat $repeat"
+echo "Just read total $totalfiles"
 
-files=`ls  ~tonyj/Test/MC*/* | head -${count}`
+files=`ls   ${datadir}/MC*/* `
 
 fcount=0
-l=0
 
-while [[ l -le repeat ]] 
+while [[ fcount -le totalfiles ]] 
 do
-l=$((l + 1))
 for f in $files; do 
-   key=`echo $f | cut -d'/' -f6 | sed 's/.fits//g'`
 
    ./readFile.sh  $f  &
 
    fcount=$((fcount + 1))
+   if [[ fcount -ge totalfiles ]]
+   then
+      break
+   fi
    if [ $((fcount % 20)) ==  0 ]
    then
        sleep 20s
-       echo "Sleeping"
+       echo "Sleeping after $fcount"
    fi 
 done
 done

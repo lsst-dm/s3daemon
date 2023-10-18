@@ -13,9 +13,9 @@ if [ $1 ]
 then
   repeat="$1"
 fi
-echo "$HOSTNAME S3_ENDPOINT_URL is $S3_ENDPOINT_URL  repeat $repeat $prefix"
+echo "$HOSTNAME S3_ENDPOINT_URL is $S3_ENDPOINT_URL  repeat $repeat $datadir"
 
-files=`ls  ~tonyj/Test/MC*/* | head -${count}`
+files=`ls  ${datadir}/MC*/* `
 
 fcount=0
 l=0
@@ -24,14 +24,15 @@ while [[ l -le repeat ]]
 do
 l=$((l + 1))
 for f in $files; do 
-   key=`echo $f | cut -d'/' -f6 | sed 's/.fits//g'`
+   key=`echo $f | cut -d'/' -f6`
    python ../python/s3daemon/send.py $f /${bucket}/${prefix}/${key} & 
    fcount=$((fcount + 1))
    if [ $((fcount % 20)) ==  0 ]
-      echo Sent $key total $fcount
    then
-       sleep 20s
+       echo Sent $key total $fcount
        echo "Sleeping"
+       sleep 20s
    fi 
 done
 done
+echo Sent  total $fcount
