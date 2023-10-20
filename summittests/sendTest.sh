@@ -25,7 +25,7 @@ for f in $files; do
    key=`echo $f | cut -d'/' -f6`
    python ../python/s3daemon/send.py $f /${bucket}/${prefix}/${key} & 
    fcount=$((fcount + 1))
-   if [[ fcount -ge total0 ]]
+   if [[ fcount -ge total ]]
    then
        break
    fi
