@@ -8,7 +8,7 @@ source  envvars.sh
 cmd="$@"
 
 for n in $nodes; do 
-   exec="cd s3daemon/summittests; ${cmd}" 
+   exec="cd ~/s3daemon/summittests; ${cmd}" 
    echo $exec
    ssh $n "${exec}" &
    done

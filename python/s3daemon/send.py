@@ -19,10 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import socket
 import sys
 
-PORT = 15555
+PORT = int(os.environ["S3DAEMON_PORT"])
 
 
 def send(filename, dest):
