@@ -36,7 +36,7 @@ config = botocore.config.Config(
     ),
 )
 
-PORT = 15555
+PORT = int(os.environ["S3DAEMON_PORT"])
 endpoint_url = os.environ["S3_ENDPOINT_URL"]
 access_key = os.environ["AWS_ACCESS_KEY_ID"]
 secret_key = os.environ["AWS_SECRET_ACCESS_KEY"]

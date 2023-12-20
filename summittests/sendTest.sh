@@ -8,27 +8,26 @@ source venv/bin/activate
 
 
 
-total=2
+repeat=2
 if [ $1 ] 
 then
-  total="$1"
+  repeat="$1"
 fi
-echo "$HOSTNAME S3_ENDPOINT_URL is $S3_ENDPOINT_URL  total $total $datadir"
+echo "$HOSTNAME S3_ENDPOINT_URL is $S3_ENDPOINT_URL  repeat $repeat $datadir"
 
 files=`ls  ${datadir}/MC*/* `
 
 fcount=0
+l=0
 
-while [[ fcount -le total ]] 
+while [[ l -le repeat ]] 
 do
+echo Repetition number $l out of $repeat on $HOSTNAME
+l=$((l + 1))
 for f in $files; do 
    key=`echo $f | cut -d'/' -f6`
    python ../python/s3daemon/send.py $f /${bucket}/${prefix}/${key} & 
    fcount=$((fcount + 1))
-   if [[ fcount -ge total ]]
-   then
-       break
-   fi
    if [ $((fcount % 20)) ==  0 ]
    then
        echo Sent $key total $fcount
@@ -37,4 +36,4 @@ for f in $files; do
    fi 
 done
 done
-echo Sent  total $fcount
+echo Sent total $fcount from $HOSTNAME to $S3_ENDPOINT_URL

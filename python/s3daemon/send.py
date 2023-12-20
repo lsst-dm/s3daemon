@@ -21,8 +21,9 @@
 
 import socket
 import sys
+import os
 
-PORT = 15555
+PORT = int(os.environ["S3DAEMON_PORT"])
 
 
 def send(filename, dest):
