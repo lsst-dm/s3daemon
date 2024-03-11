@@ -19,10 +19,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 import socket
 import sys
 
-PORT = 15555
+port = int(os.environ.get("PORT", 15555))
 
 
 def send(filename, dest):
@@ -36,8 +37,9 @@ def send(filename, dest):
         Destination in ``{alias}/{bucket}/{key}`` format.
         The key may contain slashes.
     """
+    global port
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-        sock.connect(("localhost", PORT))
+        sock.connect(("localhost", port))
         sock.sendall(bytes(f"{filename} {dest}\n", "UTF-8"))
         received = str(sock.recv(4096), "utf-8")
         sock.close()

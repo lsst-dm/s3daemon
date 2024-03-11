@@ -17,6 +17,10 @@ convention = "numpy"
 add-ignore = ["D107", "D105", "D102", "D100", "D200", "D205", "D400", "D104"]
 
 [tool.ruff]
+line-length = 110
+target-version = "py311"
+
+[tool.ruff.lint]
 ignore = [
     "N802",
     "N803",
@@ -34,7 +38,6 @@ ignore = [
     "D205",
     "D400",
 ]
-line-length = 110
 select = [
     "E",  # pycodestyle
     "F",  # pycodestyle
@@ -42,15 +45,9 @@ select = [
     "W",  # pycodestyle
     "D",  # pydocstyle
 ]
-target-version = "py311"
-# Commented out to suppress "unused noqa" in jenkins which has older ruff not
-# generating E721.
-#extend-select = [
-#    "RUF100", # Warn about unused noqa
-#]
 
-[tool.ruff.pycodestyle]
+[tool.ruff.lint.pycodestyle]
 max-doc-length = 79
 
-[tool.ruff.pydocstyle]
+[tool.ruff.lint.pydocstyle]
 convention = "numpy"
