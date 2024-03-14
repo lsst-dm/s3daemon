@@ -27,8 +27,15 @@ import time
 import aiobotocore.session
 import botocore
 
+port = int(os.environ.get("PORT", 15555))
+
+endpoint_url = os.environ["S3_ENDPOINT_URL"]
+access_key = os.environ["AWS_ACCESS_KEY_ID"]
+secret_key = os.environ["AWS_SECRET_ACCESS_KEY"]
+max_connections = int(os.environ.get("MAX_CONNECTIONS", 25))
+
 config = botocore.config.Config(
-    max_pool_connections=25,
+    max_pool_connections=max_connections,
     tcp_keepalive=True,
     s3=dict(
         payload_signing_enabled=False,
@@ -36,14 +43,10 @@ config = botocore.config.Config(
     ),
 )
 
-PORT = 15555
-endpoint_url = os.environ["S3_ENDPOINT_URL"]
-access_key = os.environ["AWS_ACCESS_KEY_ID"]
-secret_key = os.environ["AWS_SECRET_ACCESS_KEY"]
-
 pylog_longLogFmt = "{levelname} {asctime} {name} - {message}"
-if "S3DAEMON_LOG" in os.environ:
-    logging.basicConfig(filename=os.environ["S3DAEMON_LOG"], format=pylog_longLogFmt, style="{")
+log_file = os.environ.get("S3DAEMON_LOG")
+if log_file is not None:
+    logging.basicConfig(filename=log_file, format=pylog_longLogFmt, style="{")
 else:
     logging.basicConfig(format=pylog_longLogFmt, style="{")
 log = logging.getLogger(__name__)
@@ -66,16 +69,21 @@ async def handle_client(client, reader, writer):
     start = time.time()
     # ignore the alias
     _, bucket, key = dest.split("/", maxsplit=2)
+    result = "Success"
     with open(filename, "rb") as f:
         try:
             await client.put_object(Body=f, Bucket=bucket, Key=key)
             writer.write(b"Success")
         except Exception as e:
             writer.write(bytes(repr(e), "UTF-8"))
-    log.info("%f %f sec", start, time.time() - start)
+            result = f"Exception {e}"
+    log.info("%f %f sec: %s", start, time.time() - start, result)
 
 
 async def main():
+    """Run the daemon server."""
+    global access_key, secret_key, endpoint_url, config, port
+
     """Start the server."""
     session = aiobotocore.session.get_session()
     async with session.create_client(
@@ -89,7 +97,7 @@ async def main():
         async def client_cb(reader, writer):
             await handle_client(client, reader, writer)
 
-        server = await asyncio.start_server(client_cb, "localhost", PORT)
+        server = await asyncio.start_server(client_cb, "localhost", port)
         log.info("Starting server")
         async with server:
             await server.serve_forever()
