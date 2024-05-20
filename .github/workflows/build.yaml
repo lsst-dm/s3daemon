@@ -67,7 +67,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install uv
-          uv pip install --upgrade setuptools wheel build
+          uv pip install --system setuptools wheel build
 
       - name: Build and create distribution
         run: |
