@@ -76,7 +76,7 @@ async def handle_client(client, reader, writer):
     log.info("%f %f sec", start, time.time() - start)
 
 
-async def main():
+async def go():
     """Start the server."""
     session = aiobotocore.session.get_session()
     async with session.create_client(
@@ -96,5 +96,10 @@ async def main():
             await server.serve_forever()
 
 
+def main():
+    """CLI script entry point."""
+    asyncio.run(go())
+
+
 if __name__ == "__main__":
-    asyncio.run(main())
+    main()
