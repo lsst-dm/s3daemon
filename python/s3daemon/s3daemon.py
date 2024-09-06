@@ -36,7 +36,8 @@ config = botocore.config.Config(
     ),
 )
 
-PORT = 15555
+host = os.environ.get("S3DAEMON_HOST", "localhost")
+port = int(os.environ.get("S3DAEMON_PORT", 15555))
 endpoint_url = os.environ["S3_ENDPOINT_URL"]
 access_key = os.environ["AWS_ACCESS_KEY_ID"]
 secret_key = os.environ["AWS_SECRET_ACCESS_KEY"]
@@ -89,7 +90,7 @@ async def main():
         async def client_cb(reader, writer):
             await handle_client(client, reader, writer)
 
-        server = await asyncio.start_server(client_cb, "localhost", PORT)
+        server = await asyncio.start_server(client_cb, host, port)
         log.info("Starting server")
         async with server:
             await server.serve_forever()
