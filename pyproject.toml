@@ -1,3 +1,22 @@
+[project]
+name = "s3daemon"
+dynamic = ["version", "dependencies"]
+
+[build-system]
+requires = ["setuptools>=64", "setuptools_scm>=8"]
+build-backend = "setuptools.build_meta"
+
+[project.scripts]
+s3daemon = "s3daemon.s3daemon:main"
+
+[tool.setuptools_scm]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+
+[tool.setuptools]
+package-dir = {"" = "python"}
+
 [tool.black]
 line-length = 110
 target-version = ["py311"]
