@@ -8,6 +8,7 @@ build-backend = "setuptools.build_meta"
 
 [project.scripts]
 s3daemon = "s3daemon.s3daemon:main"
+s3nd = "s3daemon.send:main"
 
 [tool.setuptools_scm]
 

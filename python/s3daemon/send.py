@@ -50,5 +50,14 @@ def send(filename, dest):
             sys.exit(1)
 
 
-if __name__ == "__main__":
+def main():
+    """CLI entry point."""
+    if len(sys.argv) != 3:
+        print(f"Usage: {sys.argv[0]} filename dest", file=sys.stderr)
+        sys.exit(1)
+
     send(sys.argv[1], sys.argv[2])
+
+
+if __name__ == "__main__":
+    main()
