@@ -81,9 +81,10 @@ async def handle_client(client, reader, writer):
         try:
             await client.put_object(Body=f, Bucket=bucket, Key=key)
             writer.write(b"Success")
+            log.info("%f %f sec - %s", start, time.time() - start, filename)
         except Exception as e:
             writer.write(bytes(repr(e), "UTF-8"))
-    log.info("%f %f sec", start, time.time() - start)
+            log.exception("%f %f sec - %s", start, time.time() - start, filename)
 
 
 async def go():
