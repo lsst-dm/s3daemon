@@ -27,13 +27,23 @@ import time
 import aiobotocore.session
 import botocore
 
+max_connections = int(os.environ.get("S3DAEMON_MAX_CONNECTIONS", 25))
+connect_timeout = float(os.environ.get("S3DAEMON_CONNECT_TIMEOUT", 5.0))
+max_retries = int(os.environ.get("S3DAEMON_MAX_RETRIES", 2))
+
 config = botocore.config.Config(
-    max_pool_connections=25,
+    max_pool_connections=max_connections,
     tcp_keepalive=True,
+    connect_timeout=connect_timeout,
     s3=dict(
         payload_signing_enabled=False,
         addressing_style="path",
     ),
+    retries=dict(
+        total_max_attempts=max_retries,
+        mode="adaptive",
+    ),
+    disable_request_compression=True,
 )
 
 host = os.environ.get("S3DAEMON_HOST", "localhost")
@@ -71,9 +81,10 @@ async def handle_client(client, reader, writer):
         try:
             await client.put_object(Body=f, Bucket=bucket, Key=key)
             writer.write(b"Success")
+            log.info("%f %f sec - %s", start, time.time() - start, filename)
         except Exception as e:
             writer.write(bytes(repr(e), "UTF-8"))
-    log.info("%f %f sec", start, time.time() - start)
+            log.exception("%f %f sec - %s", start, time.time() - start, filename)
 
 
 async def go():
