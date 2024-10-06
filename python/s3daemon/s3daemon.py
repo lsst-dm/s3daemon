@@ -77,14 +77,14 @@ async def handle_client(client, reader, writer):
     start = time.time()
     # ignore the alias
     _, bucket, key = dest.split("/", maxsplit=2)
-    with open(filename, "rb") as f:
-        try:
+    try:
+        with open(filename, "rb") as f:
             await client.put_object(Body=f, Bucket=bucket, Key=key)
             writer.write(b"Success")
             log.info("%f %f sec - %s", start, time.time() - start, filename)
-        except Exception as e:
-            writer.write(bytes(repr(e), "UTF-8"))
-            log.exception("%f %f sec - %s", start, time.time() - start, filename)
+    except Exception as e:
+        writer.write(bytes(repr(e), "UTF-8"))
+        log.exception("%f %f sec - %s", start, time.time() - start, filename)
 
 
 async def go():
