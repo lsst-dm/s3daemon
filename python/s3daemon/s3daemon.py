@@ -68,24 +68,43 @@ async def handle_client(client, conn):
 
     Parameters
     ----------
-    client : `S3`
+    client : `aiobotocore.client.S3`
         The S3 client to use to talk to the server.
-    conn : `socket.Socket`
-        The socket connected to the client.
+    conn : `socket.socket`
+        The socket connected to the client.  This function closes the socket.
     """
-    filename, dest = conn.recv(4096).decode("UTF-8").rstrip().split(" ")
     start = time.time()
-    # ignore the alias
-    _, bucket, key = dest.split("/", maxsplit=2)
+    key = None
     try:
+        buffer = conn.recv(4096)
+        if buffer == "":
+            conn.send(b"Empty request")
+            conn.close()
+            log.error("Empty request")
+            return
+        while (pos := buffer.rfind(b"\n")) == -1:
+            newbuf = conn.recv(4096)
+            if newbuf == "":
+                # Socket closed; handle as if it ended in a newline
+                pos = len(buffer)
+                break
+            buffer += newbuf
+        buffer = buffer[:pos]
+        filename, dest = buffer.decode("UTF-8").rstrip().split(" ")
+        # ignore the alias
+        _, bucket, key = dest.split("/", maxsplit=2)
         with open(filename, "rb") as f:
             await client.put_object(Body=f, Bucket=bucket, Key=key)
-            conn.send(b"Success")
-            log.info("%f %f sec - %s", start, time.time() - start, key)
+        conn.send(b"Success")
+        log.info("%f %f sec - %s", start, time.time() - start, key)
     except Exception as e:
-        conn.send(bytes(repr(e), "UTF-8"))
         log.exception("%f %f sec - %s", start, time.time() - start, key)
-    conn.close()
+        try:
+            conn.send(repr(e).encode("UTF-8"))
+        except Exception:
+            pass
+    finally:
+        conn.close()
 
 
 async def go():
