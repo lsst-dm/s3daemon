@@ -32,6 +32,7 @@ max_connections = int(os.environ.get("S3DAEMON_MAX_CONNECTIONS", 25))
 connect_timeout = float(os.environ.get("S3DAEMON_CONNECT_TIMEOUT", 5.0))
 max_retries = int(os.environ.get("S3DAEMON_MAX_RETRIES", 2))
 max_clients = int(os.environ.get("S3DAEMON_MAX_CLIENTS", 25))
+accept_wait = float(os.environ.get("S3DAEMON_ACCEPT_WAIT", 0.001))
 
 config = botocore.config.Config(
     max_pool_connections=max_connections,
@@ -133,7 +134,7 @@ async def go():
                         break
                     except (TimeoutError, BlockingIOError):
                         # Allow other tasks to run.
-                        await asyncio.sleep(0)
+                        await asyncio.sleep(accept_wait)
                 task = asyncio.create_task(handle_client(client, conn))
                 # Add to set to avoid premature cleanup.
                 background_tasks.add(task)
